@@ -1,0 +1,40 @@
+name: Build Minimal Debian XFCE ISO
+
+on:
+  workflow_dispatch: # manual trigger
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y live-build cdebootstrap xorriso wget
+
+      - name: Prepare live-build configuration
+        run: |
+          mkdir -p live-debian
+          cd live-debian
+          lb config \
+            --arch i386 \
+            --binary-images iso-hybrid \
+            --debian-installer live \
+            --packages "xfce4 xfce4-terminal lightdm network-manager network-manager-gnome xorg dbus-x11" \
+            --bootappend-live "boot=live components" \
+            --debian-installer-gui true
+
+      - name: Build ISO
+        run: |
+          cd live-debian
+          sudo lb build
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: debian-xfce-minimal-iso
+          path: live-debian/live-image-i386.hybrid.iso
