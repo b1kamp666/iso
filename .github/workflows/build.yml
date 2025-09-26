@@ -24,7 +24,7 @@ jobs:
             --architectures i386 \
             --binary-images iso-hybrid \
             --debian-installer live \
-            --package-lists ../config/package-lists/minimal.list.chroot \
+            --packages-lists ../config/package-lists/minimal.list.chroot \
             --config ../config/includes.chroot \
             --bootappend-live "boot=live components" \
             --debian-installer-gui true
