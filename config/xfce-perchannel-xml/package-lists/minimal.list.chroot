@@ -1,0 +1,8 @@
+xfce4
+xfce4-terminal
+lightdm
+lightdm-gtk-greeter
+network-manager
+network-manager-gnome
+xorg
+dbus-x11
