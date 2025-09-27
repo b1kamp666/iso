@@ -14,7 +14,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y live-build cdebootstrap xorriso wget
+          sudo apt install -y live-build cdebootstrap xorriso wget ca-certificates
 
       - name: Prepare live-build configuration
         run: |
@@ -25,7 +25,10 @@ jobs:
             --binary-images iso-hybrid \
             --debian-installer live \
             --bootappend-live "boot=live components" \
-            --debian-installer-gui true
+            --debian-installer-gui true \
+            --mirror-bootstrap http://deb.debian.org/debian \
+            --mirror-binary http://deb.debian.org/debian \
+            --mirror-binary-security http://security.debian.org/debian-security
 
       - name: Build ISO
         run: |
