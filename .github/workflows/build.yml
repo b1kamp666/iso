@@ -18,17 +18,42 @@ jobs:
 
       - name: Prepare live-build configuration
         run: |
-          mkdir -p live-debian
+          mkdir -p live-debian/config/package-lists
+          mkdir -p live-debian/config/hooks/normal
           cd live-debian
+
           lb config \
             --architectures i386 \
+            --distribution bookworm \
             --binary-images iso-hybrid \
             --debian-installer live \
             --bootappend-live "boot=live components" \
             --debian-installer-gui true \
-            --mirror-bootstrap http://deb.debian.org/debian \
-            --mirror-binary http://deb.debian.org/debian \
-            --mirror-binary-security http://security.debian.org/debian-security
+            --mirror-bootstrap http://mirror.gsi.de/debian \
+            --mirror-binary http://mirror.gsi.de/debian \
+            --mirror-binary-security http://mirror.gsi.de/debian-security
+
+          # Minimal XFCE environment
+          cat > config/package-lists/xfce.list.chroot <<EOF
+          task-xfce-desktop
+          lightdm
+          network-manager
+          firefox-esr
+          sudo
+          EOF
+
+          # Hook: strip docs, manpages, and locales to shrink ISO
+          cat > config/hooks/normal/01-minimal.chroot <<'EOF'
+          #!/bin/sh
+          set -e
+          # Remove documentation
+          rm -rf /usr/share/doc/*
+          # Remove manpages
+          rm -rf /usr/share/man/*
+          # Keep only en_US locale
+          find /usr/share/locale -mindepth 1 -maxdepth 1 ! -name "en" ! -name "en_US" -exec rm -rf {} +
+          EOF
+          chmod +x config/hooks/normal/01-minimal.chroot
 
       - name: Build ISO
         run: |
@@ -38,5 +63,5 @@ jobs:
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
-          name: debian-xfce-minimal-iso
+          name: debian-bookworm-i386-xfce-minimal-iso
           path: live-debian/live-image-i386.hybrid.iso
